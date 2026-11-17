@@ -5,6 +5,7 @@ import { useAuthStore } from '../store';
 import { authAPI } from '../api';
 import { Button } from '../components/ui/button';
 import { Input } from '../components/ui/input';
+import BrandLogo from '../components/BrandLogo';
 import toast from 'react-hot-toast';
 
 export default function RegisterPage() {
@@ -71,32 +72,10 @@ export default function RegisterPage() {
             initial={{ scale: 0.8, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ delay: 0.1, duration: 0.4 }}
-            className="inline-flex items-center gap-3 mb-3"
+            className="inline-flex justify-center"
           >
-            <div className="w-12 h-12 border-2 border-[var(--ecu-accent)] bg-[var(--ecu-accent-bg)] flex items-center justify-center">
-              <svg className="w-7 h-7" viewBox="0 0 32 32" fill="none">
-                <path
-                  d="M16 2L18.5 5.5L22.5 4.5L23.5 8.5L27.5 8.5L27 12.5L30.5 14.5L28.5 18L31 21L28 23.5L29 27.5L25.5 28L24 31.5L20.5 29.5L16 31L11.5 29.5L8 31.5L6.5 28L3 27.5L4 23.5L1 21L3.5 18L1.5 14.5L5 12.5L4.5 8.5L8.5 8.5L9.5 4.5L13.5 5.5L16 2Z"
-                  stroke="var(--ecu-text-secondary)"
-                  strokeWidth="1.5"
-                  strokeLinejoin="round"
-                />
-                <path
-                  d="M8 18H11L13 12L16 22L19 14L21 18H24"
-                  stroke="var(--ecu-accent)"
-                  strokeWidth="2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                />
-              </svg>
-            </div>
-            <h1 className="heading-industrial text-3xl text-[var(--ecu-text)] tracking-widest">
-              ECU<span className="text-[var(--ecu-accent)]">View</span>
-            </h1>
+            <BrandLogo size="hero" />
           </motion.div>
-          <p className="text-[var(--ecu-text-secondary)] text-sm font-[family-name:var(--font-mono)]">
-            Motor ECU Veri Analiz Platformu
-          </p>
         </div>
 
         {/* Register Form */}

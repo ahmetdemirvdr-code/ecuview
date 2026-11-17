@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { User, LogOut, Settings, Home, BarChart3, Info, ChevronDown } from 'lucide-react';
 import { useAuthStore } from '../../store';
 import ThemeToggle from '../ui/ThemeToggle';
+import BrandLogo from '../BrandLogo';
 import {
   DropdownMenu,
   DropdownMenuTrigger,
@@ -11,30 +12,6 @@ import {
   DropdownMenuSeparator,
   DropdownMenuLabel,
 } from '../ui/dropdown-menu';
-
-// ECUView industrial logo SVG
-function ECULogo({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-      {/* Gear outer */}
-      <path
-        d="M16 2L18.5 5.5L22.5 4.5L23.5 8.5L27.5 8.5L27 12.5L30.5 14.5L28.5 18L31 21L28 23.5L29 27.5L25.5 28L24 31.5L20.5 29.5L16 31L11.5 29.5L8 31.5L6.5 28L3 27.5L4 23.5L1 21L3.5 18L1.5 14.5L5 12.5L4.5 8.5L8.5 8.5L9.5 4.5L13.5 5.5L16 2Z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinejoin="round"
-        fill="none"
-      />
-      {/* Signal wave inside */}
-      <path
-        d="M8 18H11L13 12L16 22L19 14L21 18H24"
-        stroke="var(--ecu-accent)"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
 
 const navLinks = [
   { to: '/', label: 'Ana Sayfa', icon: Home },
@@ -59,11 +36,8 @@ export default function Navbar() {
       {/* Left: Logo + Nav */}
       <div className="flex items-center gap-6">
         {/* Logo */}
-        <Link to="/" className="flex items-center gap-2 group">
-          <ECULogo className="w-7 h-7 text-[var(--ecu-text-secondary)] group-hover:text-[var(--ecu-accent)] transition-colors" />
-          <span className="heading-industrial text-sm text-[var(--ecu-text)] tracking-widest">
-            ECU<span className="text-[var(--ecu-accent)]">View</span>
-          </span>
+        <Link to="/" className="flex items-center group" aria-label="ECUView ana sayfa">
+          <BrandLogo size="compact" className="opacity-95 group-hover:opacity-100 transition-opacity" />
         </Link>
 
         {/* Nav Links */}

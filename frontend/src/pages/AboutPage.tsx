@@ -3,6 +3,7 @@ import { Code, Database, BarChart3, Shield, Cpu, Gauge } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '../components/ui/card';
 import { Badge } from '../components/ui/badge';
 import Navbar from '../components/layout/Navbar';
+import BrandLogo from '../components/BrandLogo';
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -57,28 +58,9 @@ export default function AboutPage() {
               <Card className="relative overflow-hidden">
                 <div className="absolute top-0 left-0 w-1 h-full bg-[var(--ecu-accent)]" />
                 <CardContent className="p-8 pl-6">
-                  <div className="flex items-start gap-6">
-                    <div className="w-16 h-16 border-2 border-[var(--ecu-accent)] bg-[var(--ecu-accent-bg)] flex items-center justify-center flex-shrink-0">
-                      <svg className="w-9 h-9" viewBox="0 0 32 32" fill="none">
-                        <path
-                          d="M16 2L18.5 5.5L22.5 4.5L23.5 8.5L27.5 8.5L27 12.5L30.5 14.5L28.5 18L31 21L28 23.5L29 27.5L25.5 28L24 31.5L20.5 29.5L16 31L11.5 29.5L8 31.5L6.5 28L3 27.5L4 23.5L1 21L3.5 18L1.5 14.5L5 12.5L4.5 8.5L8.5 8.5L9.5 4.5L13.5 5.5L16 2Z"
-                          stroke="var(--ecu-text-secondary)"
-                          strokeWidth="1.5"
-                          strokeLinejoin="round"
-                        />
-                        <path
-                          d="M8 18H11L13 12L16 22L19 14L21 18H24"
-                          stroke="var(--ecu-accent)"
-                          strokeWidth="2"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                        />
-                      </svg>
-                    </div>
+                  <div className="flex flex-col sm:flex-row items-start gap-6">
+                    <BrandLogo size="card" className="flex-shrink-0" />
                     <div>
-                      <h2 className="heading-industrial text-xl text-[var(--ecu-text)] tracking-wider mb-2">
-                        ECU<span className="text-[var(--ecu-accent)]">View</span>
-                      </h2>
                       <p className="text-sm text-[var(--ecu-text-secondary)] leading-relaxed mb-4">
                         ECUView, motor ECU (Electronic Control Unit) verilerini analiz etmek icin gelistirilmis
                         profesyonel bir veri analiz platformudur. MDF, DAT ve CSV formatindaki dosyalari
