@@ -1,0 +1,60 @@
+@import "tailwindcss";
+
+:root {
+  --ecu-primary: #1e40af;
+  --ecu-accent: #f59e0b;
+  --ecu-bg: #0f172a;
+  --ecu-surface: #1e293b;
+  --ecu-border: #334155;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  background-color: #0f172a;
+  color: #e2e8f0;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Plotly chart overrides for dark theme */
+.js-plotly-plot .plotly .modebar {
+  background: rgba(30, 41, 59, 0.8) !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn path {
+  fill: #94a3b8 !important;
+}
+
+.js-plotly-plot .plotly .modebar-btn:hover path {
+  fill: #f59e0b !important;
+}
+
+/* Custom scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #1e293b;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #475569;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #64748b;
+}
+
+/* File drop zone animation */
+.drop-active {
+  border-color: #f59e0b !important;
+  background-color: rgba(245, 158, 11, 0.1) !important;
+}
