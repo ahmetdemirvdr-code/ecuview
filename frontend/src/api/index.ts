@@ -23,14 +23,19 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 - redirect to login
+// Handle 401 - clear session only for authenticated API calls (not login/register)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    if (error.response?.status === 401) {
+    const status = error.response?.status;
+    const url = String(error.config?.url || '');
+    const isAuthForm = url.includes('/auth/login') || url.includes('/auth/register');
+    if (status === 401 && !isAuthForm && localStorage.getItem('ecuview_token')) {
       localStorage.removeItem('ecuview_token');
       localStorage.removeItem('ecuview_user');
-      window.location.href = '/login';
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }

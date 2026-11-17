@@ -11,10 +11,25 @@ interface AuthState {
   loadFromStorage: () => void;
 }
 
+function readAuthFromStorage(): Pick<AuthState, 'user' | 'token' | 'isAuthenticated'> {
+  try {
+    const token = localStorage.getItem('ecuview_token');
+    const userStr = localStorage.getItem('ecuview_user');
+    if (!token || !userStr) {
+      return { token: null, user: null, isAuthenticated: false };
+    }
+    const user = JSON.parse(userStr) as User;
+    return { token, user, isAuthenticated: true };
+  } catch {
+    localStorage.removeItem('ecuview_token');
+    localStorage.removeItem('ecuview_user');
+    return { token: null, user: null, isAuthenticated: false };
+  }
+}
+
 export const useAuthStore = create<AuthState>((set) => ({
-  user: null,
-  token: null,
-  isAuthenticated: false,
+  // Hydrate synchronously so hard refresh does not bounce to /login
+  ...readAuthFromStorage(),
 
   login: (token, user) => {
     localStorage.setItem('ecuview_token', token);
@@ -29,17 +44,7 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   loadFromStorage: () => {
-    const token = localStorage.getItem('ecuview_token');
-    const userStr = localStorage.getItem('ecuview_user');
-    if (token && userStr) {
-      try {
-        const user = JSON.parse(userStr);
-        set({ token, user, isAuthenticated: true });
-      } catch {
-        localStorage.removeItem('ecuview_token');
-        localStorage.removeItem('ecuview_user');
-      }
-    }
+    set(readAuthFromStorage());
   },
 }));
 
@@ -62,8 +67,17 @@ const applyTheme = (theme: Theme) => {
   }
 };
 
+function readThemeFromStorage(): Theme {
+  const stored = localStorage.getItem('ecuview_theme') as Theme | null;
+  if (stored === 'light' || stored === 'dark') return stored;
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+}
+
+const initialTheme = readThemeFromStorage();
+applyTheme(initialTheme);
+
 export const useThemeStore = create<ThemeState>((set, get) => ({
-  theme: 'dark',
+  theme: initialTheme,
 
   toggleTheme: () => {
     const newTheme = get().theme === 'dark' ? 'light' : 'dark';
@@ -79,17 +93,9 @@ export const useThemeStore = create<ThemeState>((set, get) => ({
   },
 
   loadFromStorage: () => {
-    const stored = localStorage.getItem('ecuview_theme') as Theme | null;
-    if (stored) {
-      applyTheme(stored);
-      set({ theme: stored });
-    } else {
-      // Use system preference
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const theme = prefersDark ? 'dark' : 'light';
-      applyTheme(theme);
-      set({ theme });
-    }
+    const theme = readThemeFromStorage();
+    applyTheme(theme);
+    set({ theme });
   },
 }));
 

@@ -15,13 +15,17 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
   return <>{children}</>;
 }
 
+function GuestRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (isAuthenticated) return <Navigate to="/" replace />;
+  return <>{children}</>;
+}
+
 function App() {
-  const loadAuth = useAuthStore((s) => s.loadFromStorage);
   const loadTheme = useThemeStore((s) => s.loadFromStorage);
   useEffect(() => {
-    loadAuth();
     loadTheme();
-  }, []);
+  }, [loadTheme]);
 
   return (
     <BrowserRouter>
@@ -38,8 +42,22 @@ function App() {
         }}
       />
       <Routes>
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
+        <Route
+          path="/login"
+          element={
+            <GuestRoute>
+              <LoginPage />
+            </GuestRoute>
+          }
+        />
+        <Route
+          path="/register"
+          element={
+            <GuestRoute>
+              <RegisterPage />
+            </GuestRoute>
+          }
+        />
         <Route
           path="/"
           element={
