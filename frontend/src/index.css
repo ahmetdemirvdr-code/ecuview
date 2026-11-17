@@ -1,60 +1,208 @@
 @import "tailwindcss";
 
-:root {
-  --ecu-primary: #1e40af;
-  --ecu-accent: #f59e0b;
-  --ecu-bg: #0f172a;
-  --ecu-surface: #1e293b;
-  --ecu-border: #334155;
+/* ========================================
+   ECUView - Industrial Theme System
+   ======================================== */
+
+@theme {
+  /* Dark theme colors (default) */
+  --color-bg-primary: #0a0a0f;
+  --color-bg-surface: #1a1a2e;
+  --color-bg-surface-2: #252540;
+  --color-bg-surface-3: #2f2f4a;
+  --color-border-default: #2a2a45;
+  --color-border-accent: #3d3d5c;
+  --color-text-primary: #e8e8f0;
+  --color-text-secondary: #8888a0;
+  --color-text-muted: #55556e;
+  --color-accent-primary: #f59e0b;
+  --color-accent-secondary: #d97706;
+  --color-accent-tertiary: #92400e;
+  --color-danger: #ef4444;
+  --color-success: #22c55e;
+  --color-info: #3b82f6;
+
+  /* Font families */
+  --font-heading: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', monospace;
+  --font-body: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
 }
 
+/* ---- CSS Custom Properties for Theme Toggle ---- */
+:root {
+  /* Light theme */
+  --ecu-bg: #f5f5f0;
+  --ecu-surface: #ffffff;
+  --ecu-surface-2: #f0f0eb;
+  --ecu-surface-3: #e8e8e3;
+  --ecu-border: #d4d4cc;
+  --ecu-border-accent: #b8b8b0;
+  --ecu-text: #1a1a2e;
+  --ecu-text-secondary: #55556e;
+  --ecu-text-muted: #8888a0;
+  --ecu-accent: #d97706;
+  --ecu-accent-hover: #b45309;
+  --ecu-accent-bg: #fef3c7;
+  --ecu-danger: #dc2626;
+  --ecu-success: #16a34a;
+  --ecu-info: #2563eb;
+  --ecu-chart-bg: rgba(240, 240, 235, 0.5);
+  --ecu-chart-grid: #e2e2dd;
+  --ecu-chart-zero: #d4d4cc;
+  --ecu-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+  --ecu-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.1);
+  --ecu-skeleton: #e2e2dd;
+  --ecu-skeleton-shine: #f0f0eb;
+}
+
+.dark {
+  --ecu-bg: #0a0a0f;
+  --ecu-surface: #1a1a2e;
+  --ecu-surface-2: #252540;
+  --ecu-surface-3: #2f2f4a;
+  --ecu-border: #2a2a45;
+  --ecu-border-accent: #3d3d5c;
+  --ecu-text: #e8e8f0;
+  --ecu-text-secondary: #8888a0;
+  --ecu-text-muted: #55556e;
+  --ecu-accent: #f59e0b;
+  --ecu-accent-hover: #d97706;
+  --ecu-accent-bg: rgba(245, 158, 11, 0.15);
+  --ecu-danger: #ef4444;
+  --ecu-success: #22c55e;
+  --ecu-info: #3b82f6;
+  --ecu-chart-bg: rgba(26, 26, 46, 0.5);
+  --ecu-chart-grid: #1e1e38;
+  --ecu-chart-zero: #2a2a45;
+  --ecu-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+  --ecu-shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.4);
+  --ecu-skeleton: #252540;
+  --ecu-skeleton-shine: #2f2f4a;
+}
+
+/* ---- Base Styles ---- */
 body {
   margin: 0;
-  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: #0f172a;
-  color: #e2e8f0;
+  background-color: var(--ecu-bg);
+  color: var(--ecu-text);
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 #root {
   min-height: 100vh;
 }
 
-/* Plotly chart overrides for dark theme */
+/* ---- Industrial Grid Pattern (for auth pages) ---- */
+.industrial-grid {
+  background-image:
+    linear-gradient(var(--ecu-border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--ecu-border) 1px, transparent 1px);
+  background-size: 40px 40px;
+  background-position: center center;
+}
+
+.industrial-grid-fine {
+  background-image:
+    linear-gradient(var(--ecu-border) 0.5px, transparent 0.5px),
+    linear-gradient(90deg, var(--ecu-border) 0.5px, transparent 0.5px);
+  background-size: 20px 20px;
+  background-position: center center;
+}
+
+/* ---- Plotly chart overrides ---- */
 .js-plotly-plot .plotly .modebar {
-  background: rgba(30, 41, 59, 0.8) !important;
+  background: var(--ecu-surface) !important;
+  border: 1px solid var(--ecu-border) !important;
 }
 
 .js-plotly-plot .plotly .modebar-btn path {
-  fill: #94a3b8 !important;
+  fill: var(--ecu-text-secondary) !important;
 }
 
 .js-plotly-plot .plotly .modebar-btn:hover path {
-  fill: #f59e0b !important;
+  fill: var(--ecu-accent) !important;
 }
 
-/* Custom scrollbar */
+/* ---- Custom scrollbar ---- */
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1e293b;
+  background: var(--ecu-surface);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #475569;
-  border-radius: 4px;
+  background: var(--ecu-border-accent);
+  border-radius: 0;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #64748b;
+  background: var(--ecu-text-muted);
 }
 
-/* File drop zone animation */
-.drop-active {
-  border-color: #f59e0b !important;
-  background-color: rgba(245, 158, 11, 0.1) !important;
+/* ---- Skeleton shimmer animation ---- */
+@keyframes shimmer {
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
+}
+
+.skeleton-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--ecu-skeleton) 25%,
+    var(--ecu-skeleton-shine) 50%,
+    var(--ecu-skeleton) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.5s ease-in-out infinite;
+}
+
+/* ---- Industrial accent line ---- */
+.accent-line {
+  position: relative;
+}
+
+.accent-line::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--ecu-accent);
+}
+
+/* ---- Industrial heading style ---- */
+.heading-industrial {
+  font-family: var(--font-heading);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+}
+
+/* ---- Monospace data display ---- */
+.data-mono {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ---- Focus visible ring ---- */
+*:focus-visible {
+  outline: 2px solid var(--ecu-accent);
+  outline-offset: 2px;
+}
+
+/* ---- Selection ---- */
+::selection {
+  background: var(--ecu-accent);
+  color: #0a0a0f;
 }

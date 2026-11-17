@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
-import { FiPlay } from 'react-icons/fi';
+import { motion } from 'framer-motion';
+import { Play } from 'lucide-react';
 import { templatesAPI } from '../api';
 import { useAppStore } from '../store';
 import toast from 'react-hot-toast';
@@ -31,7 +32,6 @@ export default function TemplatePanel() {
       const config: TemplateConfig = JSON.parse(template.config);
       const channelNames = config.channels.map((ch) => ch.name);
 
-      // Check which channels exist in the current file
       const fileChannelNames = selectedFile.channels.map((ch) => ch.name);
       const available = channelNames.filter((n) => fileChannelNames.includes(n));
       const missing = channelNames.filter((n) => !fileChannelNames.includes(n));
@@ -65,31 +65,35 @@ export default function TemplatePanel() {
 
   return (
     <div className="space-y-2">
-      <h3 className="text-xs font-semibold text-slate-400 uppercase tracking-wider px-1">
-        Analiz Sablonlari
+      <h3 className="heading-industrial text-[10px] text-[var(--ecu-text-muted)] tracking-widest px-1">
+        // ANALIZ SABLONLARI
       </h3>
 
       {templates.length === 0 ? (
-        <p className="text-xs text-slate-500 px-1">Sablon yukleniyor...</p>
+        <p className="text-xs text-[var(--ecu-text-muted)] px-1 data-mono">Sablon yukleniyor...</p>
       ) : (
         <div className="space-y-1">
-          {templates.map((tpl) => (
-            <button
+          {templates.map((tpl, idx) => (
+            <motion.button
               key={tpl.id}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: idx * 0.05 }}
               onClick={() => applyTemplate(tpl)}
-              className="w-full flex items-center gap-2.5 px-2.5 py-2 rounded-lg hover:bg-slate-700/50 transition-colors text-left group"
+              className="w-full flex items-center gap-2.5 px-2.5 py-2 border border-[var(--ecu-border)]
+                hover:border-[var(--ecu-accent)] transition-all text-left group bg-[var(--ecu-surface-2)]"
             >
-              <div className="w-7 h-7 rounded-md bg-blue-500/20 flex items-center justify-center flex-shrink-0">
-                <span className="text-xs font-bold text-blue-400">
+              <div className="w-7 h-7 border border-[var(--ecu-accent)] bg-[var(--ecu-accent-bg)] flex items-center justify-center flex-shrink-0">
+                <span className="text-[10px] font-bold text-[var(--ecu-accent)] font-[family-name:var(--font-heading)]">
                   {categoryIcons[tpl.category || ''] || 'T'}
                 </span>
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm text-slate-200 truncate">{tpl.name}</p>
-                <p className="text-[10px] text-slate-500 truncate">{tpl.description}</p>
+                <p className="text-xs text-[var(--ecu-text)] truncate font-medium">{tpl.name}</p>
+                <p className="text-[10px] text-[var(--ecu-text-muted)] truncate">{tpl.description}</p>
               </div>
-              <FiPlay className="w-3.5 h-3.5 text-slate-500 group-hover:text-amber-400 flex-shrink-0" />
-            </button>
+              <Play className="w-3 h-3 text-[var(--ecu-text-muted)] group-hover:text-[var(--ecu-accent)] flex-shrink-0 transition-colors" />
+            </motion.button>
           ))}
         </div>
       )}

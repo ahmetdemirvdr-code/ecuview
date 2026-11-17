@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { User, FileInfo, FileDetail, Template } from '../types';
 
+// ---- Auth Store ----
 interface AuthState {
   user: User | null;
   token: string | null;
@@ -42,6 +43,57 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 }));
 
+// ---- Theme Store ----
+type Theme = 'light' | 'dark';
+
+interface ThemeState {
+  theme: Theme;
+  toggleTheme: () => void;
+  setTheme: (theme: Theme) => void;
+  loadFromStorage: () => void;
+}
+
+const applyTheme = (theme: Theme) => {
+  const root = document.documentElement;
+  if (theme === 'dark') {
+    root.classList.add('dark');
+  } else {
+    root.classList.remove('dark');
+  }
+};
+
+export const useThemeStore = create<ThemeState>((set, get) => ({
+  theme: 'dark',
+
+  toggleTheme: () => {
+    const newTheme = get().theme === 'dark' ? 'light' : 'dark';
+    localStorage.setItem('ecuview_theme', newTheme);
+    applyTheme(newTheme);
+    set({ theme: newTheme });
+  },
+
+  setTheme: (theme) => {
+    localStorage.setItem('ecuview_theme', theme);
+    applyTheme(theme);
+    set({ theme });
+  },
+
+  loadFromStorage: () => {
+    const stored = localStorage.getItem('ecuview_theme') as Theme | null;
+    if (stored) {
+      applyTheme(stored);
+      set({ theme: stored });
+    } else {
+      // Use system preference
+      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      const theme = prefersDark ? 'dark' : 'light';
+      applyTheme(theme);
+      set({ theme });
+    }
+  },
+}));
+
+// ---- App Store ----
 interface AppState {
   files: FileInfo[];
   selectedFile: FileDetail | null;

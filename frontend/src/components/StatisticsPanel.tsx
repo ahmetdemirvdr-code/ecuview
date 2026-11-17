@@ -1,7 +1,8 @@
 import { useState, useEffect } from 'react';
-import { FiBarChart2 } from 'react-icons/fi';
+import { BarChart3 } from 'lucide-react';
 import { analysisAPI } from '../api';
 import { useAppStore } from '../store';
+import { SkeletonTable } from './ui/Skeleton';
 import type { ChannelStatistics } from '../types';
 
 export default function StatisticsPanel() {
@@ -33,42 +34,44 @@ export default function StatisticsPanel() {
   if (!selectedFile || selectedChannels.length === 0) return null;
 
   return (
-    <div className="border-t border-slate-700 bg-slate-800/30">
-      <div className="px-4 py-2 flex items-center gap-2 border-b border-slate-700/50">
-        <FiBarChart2 className="w-4 h-4 text-amber-400" />
-        <span className="text-sm font-medium text-slate-200">Istatistikler</span>
+    <div className="border-t-2 border-[var(--ecu-border)] bg-[var(--ecu-surface)]">
+      <div className="px-4 py-2 flex items-center gap-2 border-b border-[var(--ecu-border)]">
+        <BarChart3 className="w-4 h-4 text-[var(--ecu-accent)]" />
+        <span className="heading-industrial text-[10px] text-[var(--ecu-text)] tracking-widest">
+          // ISTATISTIKLER
+        </span>
       </div>
 
       {loading ? (
-        <div className="p-4 text-center text-sm text-slate-500">Hesaplaniyor...</div>
+        <SkeletonTable rows={3} />
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
-              <tr className="text-slate-400 border-b border-slate-700/50">
-                <th className="text-left px-3 py-2 font-medium">Kanal</th>
-                <th className="text-right px-3 py-2 font-medium">Birim</th>
-                <th className="text-right px-3 py-2 font-medium">Min</th>
-                <th className="text-right px-3 py-2 font-medium">Max</th>
-                <th className="text-right px-3 py-2 font-medium">Ortalama</th>
-                <th className="text-right px-3 py-2 font-medium">Std</th>
-                <th className="text-right px-3 py-2 font-medium">Medyan</th>
-                <th className="text-right px-3 py-2 font-medium">Ornekler</th>
-                <th className="text-right px-3 py-2 font-medium">Hz</th>
+              <tr className="text-[var(--ecu-text-muted)] border-b border-[var(--ecu-border)]">
+                <th className="text-left px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Kanal</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Birim</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Min</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Max</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Ortalama</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Std</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Medyan</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Ornekler</th>
+                <th className="text-right px-3 py-2 font-[family-name:var(--font-heading)] font-medium uppercase tracking-wider text-[10px]">Hz</th>
               </tr>
             </thead>
             <tbody>
               {stats.map((s) => (
-                <tr key={s.name} className="border-b border-slate-700/30 hover:bg-slate-700/20">
-                  <td className="px-3 py-1.5 text-slate-200 font-medium">{s.name}</td>
-                  <td className="text-right px-3 py-1.5 text-slate-400">{s.unit || '-'}</td>
-                  <td className="text-right px-3 py-1.5 text-blue-300">{s.min.toFixed(4)}</td>
-                  <td className="text-right px-3 py-1.5 text-red-300">{s.max.toFixed(4)}</td>
-                  <td className="text-right px-3 py-1.5 text-green-300">{s.mean.toFixed(4)}</td>
-                  <td className="text-right px-3 py-1.5 text-slate-300">{s.std.toFixed(4)}</td>
-                  <td className="text-right px-3 py-1.5 text-amber-300">{s.median.toFixed(4)}</td>
-                  <td className="text-right px-3 py-1.5 text-slate-400">{s.sample_count.toLocaleString()}</td>
-                  <td className="text-right px-3 py-1.5 text-slate-400">{s.sample_rate.toFixed(1)}</td>
+                <tr key={s.name} className="border-b border-[var(--ecu-border)] hover:bg-[var(--ecu-surface-2)] transition-colors">
+                  <td className="px-3 py-1.5 text-[var(--ecu-text)] font-medium">{s.name}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-text-muted)] data-mono">{s.unit || '-'}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-info)] data-mono">{s.min.toFixed(4)}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-danger)] data-mono">{s.max.toFixed(4)}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-success)] data-mono">{s.mean.toFixed(4)}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-text)] data-mono">{s.std.toFixed(4)}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-accent)] data-mono">{s.median.toFixed(4)}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-text-muted)] data-mono">{s.sample_count.toLocaleString()}</td>
+                  <td className="text-right px-3 py-1.5 text-[var(--ecu-text-muted)] data-mono">{s.sample_rate.toFixed(1)}</td>
                 </tr>
               ))}
             </tbody>

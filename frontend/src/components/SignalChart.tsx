@@ -1,14 +1,17 @@
 import { useState, useEffect, useMemo } from 'react';
 import Plot from 'react-plotly.js';
-import { FiZoomIn, FiMaximize2, FiDownload, FiBarChart2 } from 'react-icons/fi';
+import { Maximize2, Download, BarChart3, ZoomIn } from 'lucide-react';
 import { analysisAPI } from '../api';
-import { useAppStore } from '../store';
+import { useAppStore, useThemeStore } from '../store';
 import { CHART_COLORS } from '../types';
 import type { SignalData } from '../types';
+import { Button } from './ui/button';
+import { SkeletonChart } from './ui/Skeleton';
 import toast from 'react-hot-toast';
 
 export default function SignalChart() {
   const { selectedFile, selectedChannels } = useAppStore();
+  const { theme } = useThemeStore();
   const [signals, setSignals] = useState<SignalData[]>([]);
   const [loading, setLoading] = useState(false);
   const [chartHeight, setChartHeight] = useState(500);
@@ -36,6 +39,8 @@ export default function SignalChart() {
     fetchSignals();
   }, [selectedFile?.id, selectedChannels]);
 
+  const isDark = theme === 'dark';
+
   const plotData = useMemo(() => {
     return signals.map((sig, idx) => ({
       x: sig.timestamps,
@@ -53,6 +58,14 @@ export default function SignalChart() {
   }, [signals]);
 
   const layout = useMemo(() => {
+    const bgColor = isDark ? 'rgba(10, 10, 15, 0)' : 'rgba(245, 245, 240, 0)';
+    const plotBgColor = isDark ? 'rgba(26, 26, 46, 0.5)' : 'rgba(240, 240, 235, 0.5)';
+    const gridColor = isDark ? '#1e1e38' : '#e2e2dd';
+    const zerolineColor = isDark ? '#2a2a45' : '#d4d4cc';
+    const textColor = isDark ? '#8888a0' : '#55556e';
+    const legendBg = isDark ? 'rgba(26, 26, 46, 0.9)' : 'rgba(255, 255, 255, 0.9)';
+    const legendText = isDark ? '#e8e8f0' : '#1a1a2e';
+
     const yAxes: Record<string, any> = {};
 
     signals.forEach((sig, idx) => {
@@ -62,45 +75,47 @@ export default function SignalChart() {
       yAxes[key] = {
         title: {
           text: `${sig.name}${sig.unit ? ` (${sig.unit})` : ''}`,
-          font: { size: 10, color: CHART_COLORS[idx % CHART_COLORS.length] },
+          font: { size: 10, color: CHART_COLORS[idx % CHART_COLORS.length], family: 'JetBrains Mono, monospace' },
         },
         titlefont: { color: CHART_COLORS[idx % CHART_COLORS.length] },
-        tickfont: { color: CHART_COLORS[idx % CHART_COLORS.length], size: 9 },
+        tickfont: { color: CHART_COLORS[idx % CHART_COLORS.length], size: 9, family: 'JetBrains Mono, monospace' },
         side: isLeft ? 'left' : 'right',
         overlaying: idx > 0 ? 'y' : undefined,
         position: isLeft ? Math.max(0, idx * 0.06) : undefined,
         anchor: idx > 1 ? 'free' : undefined,
-        gridcolor: '#1e293b',
-        zerolinecolor: '#334155',
+        gridcolor: gridColor,
+        zerolinecolor: zerolineColor,
       };
     });
 
     return {
       ...yAxes,
       xaxis: {
-        title: { text: 'Zaman (s)', font: { size: 11, color: '#94a3b8' } },
-        tickfont: { size: 9, color: '#94a3b8' },
-        gridcolor: '#1e293b',
-        zerolinecolor: '#334155',
+        title: { text: 'Zaman (s)', font: { size: 11, color: textColor, family: 'JetBrains Mono, monospace' } },
+        tickfont: { size: 9, color: textColor, family: 'JetBrains Mono, monospace' },
+        gridcolor: gridColor,
+        zerolinecolor: zerolineColor,
         rangeslider: { visible: true, thickness: 0.06 },
       },
-      paper_bgcolor: 'rgba(15, 23, 42, 0)',
-      plot_bgcolor: 'rgba(30, 41, 59, 0.5)',
-      font: { color: '#94a3b8' },
+      paper_bgcolor: bgColor,
+      plot_bgcolor: plotBgColor,
+      font: { color: textColor, family: 'JetBrains Mono, monospace' },
       legend: {
         orientation: 'h' as const,
         yanchor: 'bottom' as const,
         y: 1.02,
         xanchor: 'center' as const,
         x: 0.5,
-        font: { size: 10, color: '#e2e8f0' },
-        bgcolor: 'rgba(30, 41, 59, 0.8)',
+        font: { size: 10, color: legendText, family: 'JetBrains Mono, monospace' },
+        bgcolor: legendBg,
+        bordercolor: isDark ? '#2a2a45' : '#d4d4cc',
+        borderwidth: 1,
       },
       margin: { l: 60, r: 60, t: 40, b: 60 },
       hovermode: 'x unified' as const,
       dragmode: 'zoom' as const,
     };
-  }, [signals]);
+  }, [signals, isDark]);
 
   const handleExport = async () => {
     if (!selectedFile || selectedChannels.length === 0) return;
@@ -121,11 +136,11 @@ export default function SignalChart() {
 
   if (!selectedFile) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-500">
+      <div className="flex-1 flex items-center justify-center text-[var(--ecu-text-muted)]">
         <div className="text-center">
-          <FiBarChart2 className="w-16 h-16 mx-auto mb-4 opacity-30" />
-          <p className="text-lg">Sol panelden bir dosya secin</p>
-          <p className="text-sm mt-1">MDF/DAT dosyalari yukleyip analiz edin</p>
+          <BarChart3 className="w-16 h-16 mx-auto mb-4 opacity-20" />
+          <p className="heading-industrial text-sm tracking-wider">Sol panelden bir dosya secin</p>
+          <p className="text-xs mt-1 data-mono">MDF/DAT dosyalari yukleyip analiz edin</p>
         </div>
       </div>
     );
@@ -133,11 +148,11 @@ export default function SignalChart() {
 
   if (selectedChannels.length === 0) {
     return (
-      <div className="flex-1 flex items-center justify-center text-slate-500">
+      <div className="flex-1 flex items-center justify-center text-[var(--ecu-text-muted)]">
         <div className="text-center">
-          <FiZoomIn className="w-16 h-16 mx-auto mb-4 opacity-30" />
-          <p className="text-lg">Kanal secimi yapin</p>
-          <p className="text-sm mt-1">Grafik olusturmak icin sol panelden kanal(lar) secin</p>
+          <ZoomIn className="w-16 h-16 mx-auto mb-4 opacity-20" />
+          <p className="heading-industrial text-sm tracking-wider">Kanal secimi yapin</p>
+          <p className="text-xs mt-1 data-mono">Grafik olusturmak icin sol panelden kanal(lar) secin</p>
         </div>
       </div>
     );
@@ -146,36 +161,37 @@ export default function SignalChart() {
   return (
     <div className="flex-1 flex flex-col">
       {/* Toolbar */}
-      <div className="flex items-center justify-between px-4 py-2 border-b border-slate-700">
+      <div className="flex items-center justify-between px-4 py-2 border-b-2 border-[var(--ecu-border)]">
         <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-400">
-            {signals.length} sinyal  |  {selectedFile.original_filename}
+          <span className="data-mono text-xs text-[var(--ecu-text-secondary)]">
+            {signals.length} sinyal | {selectedFile.original_filename}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <button
+          <Button
+            variant="ghost"
+            size="icon"
             onClick={() => setChartHeight((h) => Math.min(h + 100, 900))}
-            className="p-1.5 text-slate-400 hover:text-white hover:bg-slate-700 rounded"
             title="Grafigi buyut"
           >
-            <FiMaximize2 className="w-4 h-4" />
-          </button>
-          <button
+            <Maximize2 className="w-4 h-4" />
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
             onClick={handleExport}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white text-sm rounded-lg transition-colors"
+            className="gap-1.5"
           >
-            <FiDownload className="w-4 h-4" />
+            <Download className="w-3.5 h-3.5" />
             CSV
-          </button>
+          </Button>
         </div>
       </div>
 
       {/* Chart */}
       <div className="flex-1 p-2">
         {loading ? (
-          <div className="flex items-center justify-center h-full">
-            <div className="animate-spin w-8 h-8 border-2 border-blue-500 border-t-transparent rounded-full" />
-          </div>
+          <SkeletonChart />
         ) : (
           <Plot
             data={plotData as any}
@@ -194,20 +210,18 @@ export default function SignalChart() {
 
       {/* Statistics bar */}
       {signals.length > 0 && (
-        <div className="border-t border-slate-700 px-4 py-2">
+        <div className="border-t-2 border-[var(--ecu-border)] px-4 py-2">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
             {signals.map((sig, idx) => (
               <div
                 key={sig.name}
-                className="flex items-center gap-2 text-xs"
-                style={{ color: CHART_COLORS[idx % CHART_COLORS.length] }}
+                className="flex items-center gap-2 text-xs border-l-2 pl-2"
+                style={{ borderLeftColor: CHART_COLORS[idx % CHART_COLORS.length] }}
               >
-                <div
-                  className="w-3 h-3 rounded-sm flex-shrink-0"
-                  style={{ backgroundColor: CHART_COLORS[idx % CHART_COLORS.length] }}
-                />
-                <span className="font-medium truncate">{sig.name}</span>
-                <span className="text-slate-400 flex-shrink-0">
+                <span className="font-medium truncate text-[var(--ecu-text)]" style={{ color: CHART_COLORS[idx % CHART_COLORS.length] }}>
+                  {sig.name}
+                </span>
+                <span className="data-mono text-[10px] text-[var(--ecu-text-muted)] flex-shrink-0">
                   Min:{sig.min.toFixed(2)} Max:{sig.max.toFixed(2)} Ort:{sig.mean.toFixed(2)}
                 </span>
               </div>

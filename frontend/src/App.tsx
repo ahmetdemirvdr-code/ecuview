@@ -1,10 +1,13 @@
 import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { Toaster } from 'react-hot-toast';
-import { useAuthStore } from './store';
+import { useAuthStore, useThemeStore } from './store';
 import LoginPage from './pages/LoginPage';
 import RegisterPage from './pages/RegisterPage';
 import DashboardPage from './pages/DashboardPage';
+import HomePage from './pages/HomePage';
+import ProfilePage from './pages/ProfilePage';
+import AboutPage from './pages/AboutPage';
 
 function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
@@ -13,10 +16,11 @@ function ProtectedRoute({ children }: { children: React.ReactNode }) {
 }
 
 function App() {
-  const loadFromStorage = useAuthStore((s) => s.loadFromStorage);
-
+  const loadAuth = useAuthStore((s) => s.loadFromStorage);
+  const loadTheme = useThemeStore((s) => s.loadFromStorage);
   useEffect(() => {
-    loadFromStorage();
+    loadAuth();
+    loadTheme();
   }, []);
 
   return (
@@ -25,9 +29,11 @@ function App() {
         position="top-right"
         toastOptions={{
           style: {
-            background: '#1e293b',
-            color: '#e2e8f0',
-            border: '1px solid #334155',
+            background: 'var(--ecu-surface)',
+            color: 'var(--ecu-text)',
+            border: '1px solid var(--ecu-border)',
+            fontFamily: 'var(--font-mono)',
+            fontSize: '13px',
           },
         }}
       />
@@ -38,7 +44,31 @@ function App() {
           path="/"
           element={
             <ProtectedRoute>
+              <HomePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
               <DashboardPage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <ProfilePage />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/about"
+          element={
+            <ProtectedRoute>
+              <AboutPage />
             </ProtectedRoute>
           }
         />

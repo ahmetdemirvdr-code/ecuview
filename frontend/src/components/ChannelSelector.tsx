@@ -1,8 +1,11 @@
 import { useState, useMemo } from 'react';
-import { FiSearch, FiChevronDown, FiChevronRight, FiCheck } from 'react-icons/fi';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Search, ChevronDown, ChevronRight, Check, X } from 'lucide-react';
 import { useAppStore } from '../store';
 import { CATEGORY_LABELS, CHART_COLORS } from '../types';
 import type { ChannelInfo } from '../types';
+import { Input } from './ui/input';
+import { Badge } from './ui/badge';
 
 export default function ChannelSelector() {
   const { selectedFile, selectedChannels, toggleChannel, setSelectedChannels, clearChannels } = useAppStore();
@@ -11,7 +14,6 @@ export default function ChannelSelector() {
 
   const channels = selectedFile?.channels || [];
 
-  // Group channels by category
   const grouped = useMemo(() => {
     const groups: Record<string, ChannelInfo[]> = {};
     const filtered = channels.filter(
@@ -26,7 +28,6 @@ export default function ChannelSelector() {
       groups[cat].push(ch);
     }
 
-    // Sort categories by count (descending)
     return Object.entries(groups).sort((a, b) => b[1].length - a[1].length);
   }, [channels, search]);
 
@@ -52,8 +53,8 @@ export default function ChannelSelector() {
 
   if (!selectedFile) {
     return (
-      <div className="text-center py-8 text-slate-500">
-        <p className="text-sm">Bir dosya secin</p>
+      <div className="text-center py-8 text-[var(--ecu-text-muted)]">
+        <p className="text-xs data-mono">Bir dosya secin</p>
       </div>
     );
   }
@@ -62,21 +63,25 @@ export default function ChannelSelector() {
     <div className="space-y-3">
       {/* Search */}
       <div className="relative">
-        <FiSearch className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-        <input
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-[var(--ecu-text-muted)]" />
+        <Input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Kanal ara..."
-          className="w-full pl-9 pr-3 py-2 bg-slate-900 border border-slate-600 rounded-lg text-sm text-white placeholder-slate-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          className="pl-9 h-8 text-xs"
         />
       </div>
 
       {/* Selection info */}
-      <div className="flex items-center justify-between text-xs text-slate-400">
-        <span>{selectedChannels.length} kanal secili</span>
+      <div className="flex items-center justify-between text-xs">
+        <span className="data-mono text-[var(--ecu-text-muted)]">{selectedChannels.length} secili</span>
         {selectedChannels.length > 0 && (
-          <button onClick={clearChannels} className="text-red-400 hover:text-red-300">
+          <button
+            onClick={clearChannels}
+            className="flex items-center gap-1 text-[var(--ecu-danger)] hover:underline text-xs"
+          >
+            <X className="w-3 h-3" />
             Temizle
           </button>
         )}
@@ -88,16 +93,15 @@ export default function ChannelSelector() {
           {selectedChannels.map((name, idx) => (
             <span
               key={name}
-              className="inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-medium cursor-pointer hover:opacity-80"
+              className="inline-flex items-center gap-1 px-1.5 py-0.5 text-[10px] font-medium cursor-pointer hover:opacity-80 border-l-2 bg-[var(--ecu-surface-2)]"
               style={{
-                backgroundColor: `${CHART_COLORS[idx % CHART_COLORS.length]}20`,
+                borderLeftColor: CHART_COLORS[idx % CHART_COLORS.length],
                 color: CHART_COLORS[idx % CHART_COLORS.length],
-                borderLeft: `3px solid ${CHART_COLORS[idx % CHART_COLORS.length]}`,
               }}
               onClick={() => toggleChannel(name)}
             >
               {name}
-              <span className="ml-1 opacity-60">&times;</span>
+              <X className="w-2.5 h-2.5 opacity-60" />
             </span>
           ))}
         </div>
@@ -110,74 +114,82 @@ export default function ChannelSelector() {
           const selectedInCat = catChannels.filter((ch) => selectedChannels.includes(ch.name)).length;
 
           return (
-            <div key={category} className="border border-slate-700/50 rounded-lg overflow-hidden">
+            <div key={category} className="border border-[var(--ecu-border)] overflow-hidden">
               {/* Category header */}
               <button
                 onClick={() => toggleCategory(category)}
-                className="w-full flex items-center justify-between px-3 py-2 bg-slate-800/50 hover:bg-slate-700/50 transition-colors"
+                className="w-full flex items-center justify-between px-2.5 py-1.5 bg-[var(--ecu-surface-2)] hover:bg-[var(--ecu-surface-3)] transition-colors"
               >
                 <div className="flex items-center gap-2">
                   {isExpanded ? (
-                    <FiChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-3.5 h-3.5 text-[var(--ecu-text-muted)]" />
                   ) : (
-                    <FiChevronRight className="w-4 h-4 text-slate-400" />
+                    <ChevronRight className="w-3.5 h-3.5 text-[var(--ecu-text-muted)]" />
                   )}
-                  <span className="text-sm font-medium text-slate-200">
+                  <span className="text-xs font-medium text-[var(--ecu-text)] font-[family-name:var(--font-heading)] uppercase tracking-wider">
                     {CATEGORY_LABELS[category] || category}
                   </span>
-                  <span className="text-xs text-slate-500">({catChannels.length})</span>
+                  <span className="data-mono text-[10px] text-[var(--ecu-text-muted)]">({catChannels.length})</span>
                 </div>
                 {selectedInCat > 0 && (
-                  <span className="text-xs bg-blue-500/20 text-blue-300 px-1.5 py-0.5 rounded">
+                  <Badge variant="default" className="text-[9px] py-0 px-1">
                     {selectedInCat}
-                  </span>
+                  </Badge>
                 )}
               </button>
 
               {/* Channel list */}
-              {isExpanded && (
-                <div className="border-t border-slate-700/50">
-                  {/* Select all in category */}
-                  <button
-                    onClick={() => selectAllInCategory(catChannels)}
-                    className="w-full text-left px-3 py-1.5 text-xs text-blue-400 hover:bg-slate-700/30"
+              <AnimatePresence>
+                {isExpanded && (
+                  <motion.div
+                    initial={{ height: 0, opacity: 0 }}
+                    animate={{ height: 'auto', opacity: 1 }}
+                    exit={{ height: 0, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                    className="overflow-hidden border-t border-[var(--ecu-border)]"
                   >
-                    Tumunu sec/kaldir
-                  </button>
+                    {/* Select all */}
+                    <button
+                      onClick={() => selectAllInCategory(catChannels)}
+                      className="w-full text-left px-2.5 py-1 text-[10px] text-[var(--ecu-accent)] hover:bg-[var(--ecu-surface-2)] font-[family-name:var(--font-heading)] uppercase tracking-wider"
+                    >
+                      Tumunu sec/kaldir
+                    </button>
 
-                  {catChannels.map((ch) => {
-                    const isSelected = selectedChannels.includes(ch.name);
-                    const colorIdx = selectedChannels.indexOf(ch.name);
-                    const color = colorIdx >= 0 ? CHART_COLORS[colorIdx % CHART_COLORS.length] : undefined;
+                    {catChannels.map((ch) => {
+                      const isSelected = selectedChannels.includes(ch.name);
+                      const colorIdx = selectedChannels.indexOf(ch.name);
+                      const color = colorIdx >= 0 ? CHART_COLORS[colorIdx % CHART_COLORS.length] : undefined;
 
-                    return (
-                      <button
-                        key={`${ch.name}-${ch.group_index}`}
-                        onClick={() => toggleChannel(ch.name)}
-                        className={`w-full text-left px-3 py-1.5 flex items-center gap-2 hover:bg-slate-700/30 transition-colors ${
-                          isSelected ? 'bg-blue-500/10' : ''
-                        }`}
-                      >
-                        <div
-                          className={`w-4 h-4 rounded border flex-shrink-0 flex items-center justify-center ${
-                            isSelected ? 'border-blue-500 bg-blue-500' : 'border-slate-600'
+                      return (
+                        <button
+                          key={`${ch.name}-${ch.group_index}`}
+                          onClick={() => toggleChannel(ch.name)}
+                          className={`w-full text-left px-2.5 py-1.5 flex items-center gap-2 hover:bg-[var(--ecu-surface-2)] transition-colors ${
+                            isSelected ? 'bg-[var(--ecu-accent-bg)]' : ''
                           }`}
-                          style={isSelected && color ? { borderColor: color, backgroundColor: color } : {}}
                         >
-                          {isSelected && <FiCheck className="w-3 h-3 text-white" />}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <span className="text-xs text-slate-200 truncate block">{ch.name}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-[10px] text-slate-500 flex-shrink-0">
-                          {ch.unit && <span className="text-slate-400">{ch.unit}</span>}
-                          <span>{ch.sample_count}</span>
-                        </div>
-                      </button>
-                    );
-                  })}
-                </div>
-              )}
+                          <div
+                            className={`w-3.5 h-3.5 border flex-shrink-0 flex items-center justify-center ${
+                              isSelected ? '' : 'border-[var(--ecu-border-accent)]'
+                            }`}
+                            style={isSelected && color ? { borderColor: color, backgroundColor: color } : {}}
+                          >
+                            {isSelected && <Check className="w-2.5 h-2.5 text-white" />}
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <span className="text-[11px] text-[var(--ecu-text)] truncate block">{ch.name}</span>
+                          </div>
+                          <div className="flex items-center gap-1.5 text-[9px] data-mono text-[var(--ecu-text-muted)] flex-shrink-0">
+                            {ch.unit && <span className="text-[var(--ecu-text-secondary)]">{ch.unit}</span>}
+                            <span>{ch.sample_count}</span>
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           );
         })}
