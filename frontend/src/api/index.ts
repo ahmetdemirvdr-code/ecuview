@@ -6,6 +6,7 @@ import type {
   SignalData,
   ChannelStatistics,
   Template,
+  StorageQuota,
 } from '../types';
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api';
@@ -96,6 +97,11 @@ export const filesAPI = {
 
   delete: async (fileId: number): Promise<void> => {
     await api.delete(`/files/${fileId}`);
+  },
+
+  getQuota: async (): Promise<StorageQuota> => {
+    const res = await api.get('/files/quota');
+    return res.data;
   },
 };
 

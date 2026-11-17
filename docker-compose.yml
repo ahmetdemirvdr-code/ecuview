@@ -6,6 +6,8 @@ services:
       - DATABASE_URL=sqlite:///./data/ecuview.db
       - UPLOAD_DIR=/app/data/uploads
       - SECRET_KEY=${SECRET_KEY}
+      - MAX_FILE_SIZE=${MAX_FILE_SIZE:-52428800}
+      - MAX_USER_STORAGE=${MAX_USER_STORAGE:-104857600}
     volumes:
       - ecuview-data:/app/data
     expose:

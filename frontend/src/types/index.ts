@@ -48,6 +48,17 @@ export interface FileDetail extends FileInfo {
   channels: ChannelInfo[];
 }
 
+export interface StorageQuota {
+  used_bytes: number;
+  max_bytes: number;
+  remaining_bytes: number;
+  max_file_bytes: number;
+  used_human: string;
+  max_human: string;
+  remaining_human: string;
+  max_file_human: string;
+}
+
 export interface SignalData {
   name: string;
   unit: string | null;

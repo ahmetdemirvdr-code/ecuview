@@ -75,6 +75,17 @@ class FileDetail(FileInfo):
     channels: List[ChannelInfo] = []
 
 
+class StorageQuota(BaseModel):
+    used_bytes: int
+    max_bytes: int
+    remaining_bytes: int
+    max_file_bytes: int
+    used_human: str
+    max_human: str
+    remaining_human: str
+    max_file_human: str
+
+
 # Analysis schemas
 class SignalRequest(BaseModel):
     file_id: int

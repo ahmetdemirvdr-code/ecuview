@@ -1,10 +1,11 @@
-import { useCallback, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Upload, FileText, Trash2, Clock, Layers, Activity } from 'lucide-react';
+import { Upload, FileText, Trash2, Clock, Layers, Activity, HardDrive } from 'lucide-react';
 import { filesAPI } from '../api';
 import { useAppStore } from '../store';
 import { Badge } from './ui/badge';
+import type { StorageQuota } from '../types';
 import toast from 'react-hot-toast';
 
 interface Props {
@@ -12,14 +13,42 @@ interface Props {
 }
 
 export default function FileManager({ onFileSelect }: Props) {
-  const { files, setFiles } = useAppStore();
+  const { files, setFiles, setSelectedFile, selectedFile } = useAppStore();
   const [uploading, setUploading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+  const [quota, setQuota] = useState<StorageQuota | null>(null);
+
+  const refreshQuota = useCallback(async () => {
+    try {
+      const q = await filesAPI.getQuota();
+      setQuota(q);
+    } catch {
+      // ignore — upload path still enforces limits server-side
+    }
+  }, []);
+
+  useEffect(() => {
+    refreshQuota();
+  }, [refreshQuota, files]);
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     if (acceptedFiles.length === 0) return;
 
     const file = acceptedFiles[0];
+    const maxFile = quota?.max_file_bytes ?? 50 * 1024 * 1024;
+    const remaining = quota?.remaining_bytes ?? 100 * 1024 * 1024;
+
+    if (file.size > maxFile) {
+      toast.error(`Tek dosya limiti: ${quota?.max_file_human || '50 MB'}`);
+      return;
+    }
+    if (file.size > remaining) {
+      toast.error(
+        `Depolama kotasi yetersiz. Kalan: ${quota?.remaining_human || '0 B'}. Eski kayitlari silin.`
+      );
+      return;
+    }
+
     setUploading(true);
     setUploadProgress(0);
 
@@ -31,14 +60,16 @@ export default function FileManager({ onFileSelect }: Props) {
 
       const updatedFiles = await filesAPI.list();
       setFiles(updatedFiles);
+      await refreshQuota();
       onFileSelect(result.id);
     } catch (err: any) {
-      toast.error(err.response?.data?.detail || 'Dosya yuklenemedi');
+      const detail = err.response?.data?.detail;
+      toast.error(typeof detail === 'string' ? detail : 'Dosya yuklenemedi');
     } finally {
       setUploading(false);
       setUploadProgress(0);
     }
-  }, [setFiles, onFileSelect]);
+  }, [setFiles, onFileSelect, quota, refreshQuota]);
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
@@ -47,18 +78,31 @@ export default function FileManager({ onFileSelect }: Props) {
       'text/csv': ['.csv'],
     },
     maxFiles: 1,
+    maxSize: quota?.max_file_bytes ?? 50 * 1024 * 1024,
     disabled: uploading,
+    onDropRejected: (rejections) => {
+      const err = rejections[0]?.errors?.[0];
+      if (err?.code === 'file-too-large') {
+        toast.error(`Tek dosya limiti: ${quota?.max_file_human || '50 MB'}`);
+      } else {
+        toast.error(err?.message || 'Dosya kabul edilmedi');
+      }
+    },
   });
 
   const handleDelete = async (e: React.MouseEvent, fileId: number) => {
     e.stopPropagation();
-    if (!confirm('Bu dosyayi silmek istediginizden emin misiniz?')) return;
+    if (!confirm('Bu dosyayi silmek istediginizden emin misiniz? Sunucudan da kaldirilacak.')) return;
 
     try {
       await filesAPI.delete(fileId);
       const updatedFiles = await filesAPI.list();
       setFiles(updatedFiles);
-      toast.success('Dosya silindi');
+      if (selectedFile?.id === fileId) {
+        setSelectedFile(null);
+      }
+      await refreshQuota();
+      toast.success('Dosya sunucudan silindi');
     } catch {
       toast.error('Dosya silinemedi');
     }
@@ -77,8 +121,44 @@ export default function FileManager({ onFileSelect }: Props) {
     return `${min}:${sec.toString().padStart(2, '0')}`;
   };
 
+  const usedPct = quota
+    ? Math.min(100, Math.round((quota.used_bytes / Math.max(quota.max_bytes, 1)) * 100))
+    : 0;
+
   return (
     <div className="space-y-3">
+      {/* Quota bar */}
+      {quota && (
+        <div className="border border-[var(--ecu-border)] bg-[var(--ecu-surface-2)] p-2.5">
+          <div className="flex items-center justify-between gap-2 mb-1.5">
+            <span className="flex items-center gap-1.5 text-[10px] text-[var(--ecu-text-muted)] data-mono uppercase tracking-wider">
+              <HardDrive className="w-3 h-3" />
+              Depolama
+            </span>
+            <span className="text-[10px] text-[var(--ecu-text-secondary)] data-mono">
+              {quota.used_human} / {quota.max_human}
+            </span>
+          </div>
+          <div className="w-full bg-[var(--ecu-surface)] h-1.5">
+            <div
+              className="h-1.5 transition-all"
+              style={{
+                width: `${usedPct}%`,
+                backgroundColor:
+                  usedPct >= 90
+                    ? 'var(--ecu-danger)'
+                    : usedPct >= 70
+                      ? 'var(--ecu-warning, #f59e0b)'
+                      : 'var(--ecu-accent)',
+              }}
+            />
+          </div>
+          <p className="text-[9px] text-[var(--ecu-text-muted)] data-mono mt-1">
+            Tek dosya max {quota.max_file_human} · Kalan {quota.remaining_human}
+          </p>
+        </div>
+      )}
+
       {/* Upload Zone */}
       <div
         {...getRootProps()}
@@ -107,7 +187,9 @@ export default function FileManager({ onFileSelect }: Props) {
         ) : (
           <div>
             <p className="text-[var(--ecu-text)] font-medium text-sm">MDF/DAT dosyasi yukleyin</p>
-            <p className="text-[var(--ecu-text-muted)] text-xs mt-1 data-mono">.dat, .mdf, .mf4, .csv (max 500MB)</p>
+            <p className="text-[var(--ecu-text-muted)] text-xs mt-1 data-mono">
+              .dat, .mdf, .mf4, .csv · tek dosya max {quota?.max_file_human || '50 MB'} · toplam {quota?.max_human || '100 MB'}
+            </p>
           </div>
         )}
       </div>
